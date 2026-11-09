@@ -1,0 +1,293 @@
+--[[
+    Project: AkbarHub - Interactive Booth Hook (Pls Donate Style)
+    Target Executor: Delta
+    Status: Auto-Detect Booth Price & Wallet Integration
+]]--
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Saldo Awal Robux Developer
+_G.MyRobuxBalance = 670000
+
+local Window = Rayfield:CreateWindow({
+   Name = "AkbarHub | Auto Booth Donate",
+   LoadingTitle = "Menghubungkan ke Booth Game...",
+   LoadingSubtitle = "Oleh Cat-GPT untuk Developer",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "AkbarHubConfigs",
+      FileName = "BoothDonateConfig"
+   },
+   KeySystem = false, 
+})
+
+local MainTab = Window:CreateTab("Auto Booth", 4483362458)
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+local BalanceLabel = MainTab:CreateLabel("Sisa Saldo Robux: " .. tostring(_G.MyRobuxBalance) .. " R$")
+
+-- Fungsi Utama untuk Memunculkan UI Send Robux Sesuai Nominal Booth
+local function OpenFakeSendUI(targetName, price)
+   pcall(function()
+      if CoreGui:FindFirstChild("AkbarSendRobuxUI") then
+         CoreGui.FindFirstChild("AkbarSendRobuxUI"):Destroy()
+      end
+
+      local robuxAmount = tonumber(price) or 100
+      local creatorFee = math.floor(robuxAmount * 0.10)
+      local recipientGet = robuxAmount - creatorFee
+
+      local screenGui = Instance.new("ScreenGui")
+      screenGui.Name = "AkbarSendRobuxUI"
+      screenGui.Parent = CoreGui
+      screenGui.IgnoreGuiInset = true
+      screenGui.ResetOnSpawn = false
+
+      local bg = Instance.new("TextButton")
+      bg.Size = UDim2.new(1, 0, 1, 0)
+      bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+      bg.BackgroundTransparency = 0.6
+      bg.Text = ""
+      bg.AutoButtonColor = false
+      bg.Parent = screenGui
+
+      local mainFrame = Instance.new("Frame")
+      mainFrame.Size = UDim2.new(0, 380, 0, 490)
+      mainFrame.Position = UDim2.new(0.5, -190, 0.5, -245)
+      mainFrame.BackgroundColor3 = Color3.fromRGB(22, 24, 28)
+      mainFrame.BorderSizePixel = 0
+      mainFrame.Parent = bg
+
+      local mainCorner = Instance.new("UICorner")
+      mainCorner.CornerRadius = UDim.new(0, 12)
+      mainCorner.Parent = mainFrame
+
+      local topBar = Instance.new("Frame")
+      topBar.Size = UDim2.new(1, 0, 0, 50)
+      topBar.BackgroundTransparency = 1
+      topBar.Parent = mainFrame
+
+      local titleText = Instance.new("TextLabel")
+      titleText.Size = UDim2.new(0, 150, 1, 0)
+      titleText.Position = UDim2.new(0, 20, 0, 0)
+      titleText.BackgroundTransparency = 1
+      titleText.Text = "Send Robux"
+      titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+      titleText.TextSize = 16
+      titleText.Font = Enum.Font.GothamBold
+      titleText.TextXAlignment = Enum.TextXAlignment.Left
+      titleText.Parent = topBar
+
+      local balanceBadge = Instance.new("Frame")
+      balanceBadge.Size = UDim2.new(0, 110, 0, 30)
+      balanceBadge.Position = UDim2.new(1, -145, 0.5, -15)
+      balanceBadge.BackgroundColor3 = Color3.fromRGB(35, 38, 44)
+      balanceBadge.Parent = topBar
+
+      local badgeCorner = Instance.new("UICorner")
+      badgeCorner.CornerRadius = UDim.new(0, 8)
+      badgeCorner.Parent = balanceBadge
+
+      local robuxIconText = Instance.new("TextLabel")
+      robuxIconText.Size = UDim2.new(1, 0, 1, 0)
+      robuxIconText.BackgroundTransparency = 1
+      robuxIconText.Text = " R$ " .. tostring(_G.MyRobuxBalance)
+      robuxIconText.TextColor3 = Color3.fromRGB(255, 255, 255)
+      robuxIconText.TextSize = 13
+      robuxIconText.Font = Enum.Font.GothamBold
+      robuxIconText.Parent = balanceBadge
+
+      local closeButton = Instance.new("TextButton")
+      closeButton.Size = UDim2.new(0, 30, 0, 30)
+      closeButton.Position = UDim2.new(1, -40, 0.5, -15)
+      closeButton.BackgroundTransparency = 1
+      closeButton.Text = "✕"
+      closeButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+      closeButton.TextSize = 16
+      closeButton.Font = Enum.Font.GothamBold
+      closeButton.Parent = topBar
+
+      closeButton.MouseButton1Click:Connect(function()
+         screenGui:Destroy()
+      end)
+
+      local profileFrame = Instance.new("Frame")
+      profileFrame.Size = UDim2.new(1, -40, 0, 120)
+      profileFrame.Position = UDim2.new(0, 20, 0, 60)
+      profileFrame.BackgroundColor3 = Color3.fromRGB(30, 33, 38)
+      profileFrame.Parent = mainFrame
+
+      local profCorner = Instance.new("UICorner")
+      profCorner.CornerRadius = UDim.new(0, 10)
+      profCorner.Parent = profileFrame
+
+      local avatarCircle = Instance.new("Frame")
+      avatarCircle.Size = UDim2.new(0, 55, 0, 55)
+      avatarCircle.Position = UDim2.new(0.5, -27.5, 0, 15)
+      avatarCircle.BackgroundColor3 = Color3.fromRGB(50, 55, 65)
+      avatarCircle.Parent = profileFrame
+
+      local avatarCorner = Instance.new("UICorner")
+      avatarCorner.CornerRadius = UDim.new(1, 0)
+      avatarCorner.Parent = avatarCircle
+
+      local avatarLabel = Instance.new("TextLabel")
+      avatarLabel.Size = UDim2.new(1, 0, 1, 0)
+      avatarLabel.BackgroundTransparency = 1
+      avatarLabel.Text = string.sub(targetName, 1, 1):upper()
+      avatarLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+      avatarLabel.TextSize = 22
+      avatarLabel.Font = Enum.Font.GothamBold
+      avatarLabel.Parent = avatarCircle
+
+      local nameLabel = Instance.new("TextLabel")
+      nameLabel.Size = UDim2.new(1, 0, 0, 20)
+      nameLabel.Position = UDim2.new(0, 0, 0, 75)
+      nameLabel.BackgroundTransparency = 1
+      nameLabel.Text = tostring(targetName)
+      nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+      nameLabel.TextSize = 15
+      nameLabel.Font = Enum.Font.GothamBold
+      nameLabel.Parent = profileFrame
+
+      local userLabel = Instance.new("TextLabel")
+      userLabel.Size = UDim2.new(1, 0, 0, 18)
+      userLabel.Position = UDim2.new(0, 0, 0, 95)
+      userLabel.BackgroundTransparency = 1
+      userLabel.Text = "@" .. string.lower(tostring(targetName))
+      userLabel.TextColor3 = Color3.fromRGB(150, 155, 165)
+      userLabel.TextSize = 12
+      userLabel.Font = Enum.Font.Gotham
+      userLabel.Parent = profileFrame
+
+      local amountFrame = Instance.new("Frame")
+      amountFrame.Size = UDim2.new(1, -40, 0, 110)
+      amountFrame.Position = UDim2.new(0, 20, 0, 190)
+      amountFrame.BackgroundColor3 = Color3.fromRGB(30, 33, 38)
+      amountFrame.Parent = mainFrame
+
+      local amountCorner = Instance.new("UICorner")
+      amountCorner.CornerRadius = UDim.new(0, 10)
+      amountCorner.Parent = amountFrame
+
+      local robuxValText = Instance.new("TextLabel")
+      robuxValText.Size = UDim2.new(1, 0, 0, 45)
+      robuxValText.Position = UDim2.new(0, 0, 0, 12)
+      robuxValText.BackgroundTransparency = 1
+      robuxValText.Text = "R$ " .. tostring(robuxAmount)
+      robuxValText.TextColor3 = Color3.fromRGB(255, 255, 255)
+      robuxValText.TextSize = 26
+      robuxValText.Font = Enum.Font.GothamBold
+      robuxValText.Parent = amountFrame
+
+      local feeDescText = Instance.new("TextLabel")
+      feeDescText.Size = UDim2.new(1, -20, 0, 40)
+      feeDescText.Position = UDim2.new(0, 10, 0, 60)
+      feeDescText.BackgroundTransparency = 1
+      feeDescText.Text = "The recipient will get " .. tostring(recipientGet) .. " Robux after fees. In-game transfers include a 10% creator fee."
+      feeDescText.TextColor3 = Color3.fromRGB(150, 155, 165)
+      feeDescText.TextSize = 11
+      feeDescText.Font = Enum.Font.Gotham
+      feeDescText.TextWrapped = true
+      feeDescText.Parent = amountFrame
+
+      local sendButton = Instance.new("TextButton")
+      sendButton.Size = UDim2.new(1, -40, 0, 45)
+      sendButton.Position = UDim2.new(0, 20, 0, 315)
+      sendButton.BackgroundColor3 = Color3.fromRGB(0, 115, 255)
+      sendButton.Text = "Send"
+      sendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+      sendButton.TextSize = 15
+      sendButton.Font = Enum.Font.GothamBold
+      sendButton.Parent = mainFrame
+
+      local sendCorner = Instance.new("UICorner")
+      sendCorner.CornerRadius = UDim.new(0, 8)
+      sendCorner.Parent = sendButton
+
+      local termsText = Instance.new("TextLabel")
+      termsText.Size = UDim2.new(1, -40, 0, 80)
+      termsText.Position = UDim2.new(0, 20, 0, 375)
+      termsText.BackgroundTransparency = 1
+      termsText.Text = "You need an age check or parental consent to send Robux. Once you send, you cannot cancel."
+      termsText.TextColor3 = Color3.fromRGB(130, 135, 145)
+      termsText.TextSize = 11
+      termsText.Font = Enum.Font.Gotham
+      termsText.TextWrapped = true
+      termsText.TextXAlignment = Enum.TextXAlignment.Center
+      termsText.Parent = mainFrame
+
+      sendButton.MouseButton1Click:Connect(function()
+         screenGui:Destroy()
+
+         if _G.MyRobuxBalance >= robuxAmount then
+            _G.MyRobuxBalance = _G.MyRobuxBalance - robuxAmount
+            BalanceLabel:Set("Sisa Saldo Robux: " .. tostring(_G.MyRobuxBalance) .. " R$")
+
+            Rayfield:Notify({
+               Title = "Donasi Booth Berhasil! 🎉",
+               Content = "Berhasil mendonasikan " .. tostring(robuxAmount) -> tostring(robuxAmount) .. " R$ ke " .. tostring(targetName) .. "! Sisa saldo: " .. tostring(_G.MyRobuxBalance) .. " R$",
+               Duration = 5
+            })
+         else
+            Rayfield:Notify({
+               Title = "Saldo Tidak Cukup! ❌",
+               Content = "Robux Anda habis! Silakan reset saldo.",
+               Duration = 4
+            })
+         end
+      end)
+   end)
+end
+
+MainTab:CreateSection("Simulasi / Test Klik Booth")
+
+-- Tombol simulasi manual jika ingin mengetes tombol booth tertentu
+local testPrice = 100
+local testOwner = "PlayerBooth"
+
+MainTab:CreateInput({
+   Name = "Nama Pemilik Booth",
+   PlaceholderText = "Contoh: OwnerBooth",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      testOwner = Text
+   end,
+})
+
+MainTab:CreateInput({
+   Name = "Harga Produk di Booth",
+   PlaceholderText = "Contoh: 500",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      testPrice = tonumber(Text) or 100
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Simulasi Klik Tombol Booth",
+   Callback = function()
+      OpenFakeSendUI(testOwner, testPrice)
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Reset Saldo Kembali ke 670.000 R$",
+   Callback = function()
+      _G.MyRobuxBalance = 670000
+      BalanceLabel:Set("Sisa Saldo Robux: " .. tostring(_G.MyRobuxBalance) .. " R$")
+      Rayfield:Notify({
+         Title = "Saldo Direset",
+         Content = "Dompet Anda terisi kembali menjadi 670.000 R$!",
+         Duration = 3
+      })
+   end,
+})
+
+Rayfield:Notify({
+   Title = "AkbarHub Loaded",
+   Content = "Sistem Auto Booth Hook siap digunakan, Developer!",
+   Duration = 5
+})
